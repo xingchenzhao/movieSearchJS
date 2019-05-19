@@ -1,0 +1,239 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <title></title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="googlebot" content="noindex, nofollow">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+  <script
+    type="text/javascript"
+    src="/js/lib/dummy.js"
+    
+  ></script>
+
+    <link rel="stylesheet" type="text/css" href="/css/result-light.css">
+
+
+  <style id="compiled-css" type="text/css">
+      h5 {
+  display: inline;
+}
+
+#movies {
+  margin: 0.5rem 0 1rem 0;
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative;
+  border: 0px;
+}
+
+.collection.with-header .collection-header {
+  background-color: #fff;
+  padding: 10px 20px;
+  margin-bottom: 20px;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+}
+
+
+  </style>
+
+
+  
+</head>
+<body>
+    <!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.99.0/css/materialize.css">
+    <title>Movie Search</title>
+
+  </head>
+
+  <body>
+    <div class="container">
+      <h1 class="center-align">
+      </h1>
+      <input tupe="text" id="filterInput" placeholder="Type to search...">
+      <ul id="movies" class="collection with-header">
+      </ul>
+    </div>
+  </body>
+
+</html>
+
+
+  <!-- TODO: Missing CoffeeScript 2 -->
+
+  <script type="text/javascript">
+//<![CDATA[
+
+    
+var movies = [  
+        { title: 'The Matrix', rating: 7.5, category: 'Action'},
+        { title: 'Focus', rating: 6.9, category: 'Comedy'},
+        { title: 'The Lazarus Effect', rating: 6.4, category: 'Thriller'},
+        { title: 'Everly', rating: 5.0, category: 'Action'},
+        { title: 'Shazam!', rating: 7.6, category: 'Adventure'},
+        { title: 'Hellboy', rating: 5.4, category: 'Action'},
+        { title: 'Afters', rating: 6.0, category: 'Drama'},
+        { title: 'Pet Sematarys', rating: 6.2, category: 'Horror'},
+        { title: 'The Silence', rating: 5.3, category: 'Horror'},
+];
+
+
+var categoryMap = new Map();//Key:category, Value: the movieList of the category
+movies.forEach((movie) => {//convert date into category map
+  if (!(categoryMap.has(movie.category))) {
+    var myMovies = [];
+    myMovies.push(movie);
+    categoryMap.set(movie.category, myMovies);
+  } else {
+    categoryMap.get(movie.category).push(movie);
+  }
+})
+//Remove the space after the last character 
+
+function displayMovies() {//display movies on the web
+  for (var [categoryKey, MovieList] of categoryMap) {
+    var collectionOfHeader = document.getElementById("movies");
+    let newHeader = document.createElement("li");
+
+    /*category Element*/
+    var categoryName = document.createElement('h5');
+    categoryName.innerHTML = "<h5>" + categoryKey + " (</h5>";
+    newHeader.appendChild(categoryName);
+
+    /*numOfMovie Element   */
+    var numOfMovie = document.createElement('h5');
+    numOfMovie.innerHTML = "<h5>" + MovieList.length + "</h5>"; //Movie counts
+    numOfMovie.classList.add("countOfMovies"); //add class for movie counts.
+    newHeader.appendChild(numOfMovie); //append numOfMovieChild
+
+    /**add right bracket**/
+    var rightBracket = document.createElement('h5');
+    rightBracket.innerHTML = "<h5>)</h5>"
+    newHeader.appendChild(rightBracket);
+    /*****/
+    newHeader.classList.add("collection-header");
+    collectionOfHeader.appendChild(newHeader);
+
+    MovieList.forEach((myMovie) => {
+      //get collection-header
+      var collectMovies = document.getElementsByClassName("collection-header");
+      var movieItems = collectMovies[collectMovies.length - 1]; //movie items from the collection
+      /************/
+      let newMovie = document.createElement("li");
+      var ratingStar = printRating(myMovie.rating); //get ratings
+      var starElement = document.createElement('p');
+      starElement.innerHTML = "<p>" + ratingStar + "</p>";
+      newMovie.appendChild(starElement);
+      /************/
+      var titleElement = document.createElement('a');
+      titleElement.innerHTML = myMovie.title;
+      titleElement.href = getLink(myMovie.title);
+      titleElement.target = '_blank';
+      newMovie.appendChild(titleElement);
+      newMovie.classList.add("collection-item");
+      newMovie.style = 'padding-top:1px';
+      movieItems.appendChild(newMovie);
+    })
+  }
+}
+
+displayMovies();
+
+function getLink(movieTitle) {//generate a link to imdb and return the link
+  return "https://www.imdb.com/find?q=" + movieTitle;
+}
+
+let filterInput = document.getElementById('filterInput');
+filterInput.addEventListener('keyup', searchFilter);
+
+function searchFilter() {//Search for movie
+  //Get value of input
+  var filterValue = document.getElementById('filterInput').value.toUpperCase();
+  filterValue = filterValue.trim();// trim leftmost and rightmost space.
+  filterValue = filterValue.replace(/ +/g, ' ');//trim extra space between 2 letters
+  //get movies ul
+  let ul = document.getElementById('movies');
+  //get lis from ul
+  let li = ul.querySelectorAll('li.collection-item');
+  //loop through collection-item lis
+  
+  li.forEach((liElement)=>{
+  	let a = liElement.getElementsByTagName('a')[0];
+    console.log(a.innerHTML);
+    if (a.innerHTML.toUpperCase().indexOf(filterValue) > -1) {
+     //if matched
+      console.log(liElement.style.display);
+      updateNumberOfMovies('', liElement);
+      liElement.style.display = '';
+    } else {
+    //if not matched
+      updateNumberOfMovies('none', liElement);
+      liElement.style.display = 'none';
+    }
+  })
+}
+
+function updateNumberOfMovies(displayState, currentMovie) {//update number of movies for current category after searching
+  var parentOfCurrentMovie = currentMovie.parentElement;
+  var countOfMovie = parentOfCurrentMovie.getElementsByClassName('countOfMovies')[0];
+  console.log(countOfMovie.textContent);
+  if (displayState == 'none') {
+    if (currentMovie.style.display == '') {
+      countOfMovie.innerHTML = Number(countOfMovie.textContent) - 1;
+    } else {
+      return;
+    }
+  } else if (displayState == '') {
+    if (currentMovie.style.display == 'none') {
+      countOfMovie.innerHTML = Number(countOfMovie.textContent) + 1;
+    } else {
+      return;
+    }
+  }
+}
+
+function printRating(rating) {//return stars for current movie
+  var numOfStars = Math.round(rating / 2);
+  var stars = "";
+  for (var i = 0; i < 5; i++) {
+    if (i < numOfStars) {
+      stars += "&#9733 "
+    } else {
+      stars += "&#9734 "
+    }
+  }
+  return stars;
+}
+
+
+
+//]]></script>
+
+  <script>
+    // tell the embed parent frame the height of the content
+    if (window.parent && window.parent.parent){
+      window.parent.parent.postMessage(["resultsFrame", {
+        height: document.body.getBoundingClientRect().height,
+        slug: "1b4gdvjy"
+      }], "*")
+    }
+
+    // always overwrite window.name, in case users try to set it manually
+    window.name = "result"
+  </script>
+</body>
+</html>
